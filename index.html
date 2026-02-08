@@ -3,24 +3,65 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sort the Poop!</title>
+  <title>Rank the Poop Parade!</title>
   <style>
+    @import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Kalam:wght@400;700&display=swap");
+
     :root {
       color-scheme: light;
-      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-      background: #f7f2e8;
+      font-family: "Fredoka", "Trebuchet MS", sans-serif;
+      background: #f7f0e1;
       color: #2b1a12;
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
       margin: 0;
-      padding: 32px 20px 48px;
+      padding: 32px 20px 56px;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #fff7ea 0%, #f6e1c6 45%, #f0d4a5 100%);
+      overflow-x: hidden;
+    }
+
+    .confetti-clouds::before,
+    .confetti-clouds::after {
+      content: "💩";
+      position: fixed;
+      font-size: 64px;
+      opacity: 0.12;
+      animation: floaty 12s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    .confetti-clouds::before {
+      top: 12px;
+      left: 8%;
+    }
+
+    .confetti-clouds::after {
+      bottom: 40px;
+      right: 6%;
+      animation-delay: -6s;
+    }
+
+    @keyframes floaty {
+      0%,
+      100% {
+        transform: translateY(0) rotate(-4deg);
+      }
+      50% {
+        transform: translateY(-18px) rotate(4deg);
+      }
     }
 
     h1 {
       text-align: center;
-      margin-bottom: 8px;
-      font-size: 2.4rem;
+      margin-bottom: 4px;
+      font-size: clamp(2.2rem, 4vw, 3rem);
+      font-family: "Kalam", cursive;
     }
 
     p.subtitle {
@@ -28,101 +69,126 @@
       margin-top: 0;
       margin-bottom: 24px;
       color: #6b4a3b;
+      font-size: 1.05rem;
     }
 
     .game-shell {
-      max-width: 1100px;
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
       margin: 0 auto;
       background: #fffaf3;
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 20px 40px rgba(43, 26, 18, 0.15);
-      border: 2px solid #e7d6c5;
+      border-radius: 24px;
+      padding: 26px;
+      box-shadow: 0 24px 45px rgba(43, 26, 18, 0.15);
+      border: 3px solid #e7d6c5;
     }
 
     .stage-banner {
-      background: #f4e2c8;
+      background: linear-gradient(120deg, #ffe8ba, #ffd4d4);
       border: 2px dashed #a36e3f;
       padding: 12px 16px;
       border-radius: 14px;
       font-weight: 700;
       text-align: center;
       margin-bottom: 18px;
+      box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.8);
     }
 
     .arena {
       display: grid;
-      grid-template-columns: 1.2fr 2fr;
+      grid-template-columns: 1.1fr 2fr;
       gap: 24px;
     }
 
-    .name-bank {
+    .rank-bank {
       background: #fff;
-      border-radius: 16px;
-      padding: 16px;
+      border-radius: 18px;
+      padding: 18px;
       border: 2px solid #ead6c3;
-      min-height: 260px;
+      min-height: 300px;
+      box-shadow: inset 0 0 10px rgba(255, 232, 186, 0.6);
     }
 
-    .name-bank h3 {
+    .rank-bank h3 {
       margin-top: 0;
+      margin-bottom: 12px;
     }
 
-    .draggable-name {
-      background: #ffd8a9;
+    .rank-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      background: #ffe4b5;
       border: 2px solid #b66c2e;
       color: #4d2c13;
-      padding: 8px 10px;
+      padding: 8px 12px;
       margin: 8px 0;
-      border-radius: 10px;
+      border-radius: 12px;
       cursor: grab;
-      font-weight: 600;
+      font-weight: 700;
       text-align: center;
-      box-shadow: 0 4px 0 rgba(182, 108, 46, 0.4);
+      box-shadow: 0 5px 0 rgba(182, 108, 46, 0.4);
+      font-size: 0.95rem;
     }
 
-    .draggable-name.dragging {
+    .rank-pill span {
+      font-size: 1.1rem;
+    }
+
+    .rank-pill.dragging {
       opacity: 0.5;
     }
 
     .poop-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 18px;
     }
 
     .poop-card {
-      background: #fff;
-      border-radius: 16px;
+      background: linear-gradient(180deg, #fff, #fff2dd);
+      border-radius: 18px;
       border: 2px solid #d8b89c;
-      padding: 12px;
+      padding: 14px;
       text-align: center;
       position: relative;
-      min-height: 210px;
-      transition: transform 0.2s ease;
+      min-height: 260px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      overflow: hidden;
     }
 
     .poop-card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-4px) rotate(-0.5deg);
+      box-shadow: 0 10px 20px rgba(107, 74, 59, 0.2);
     }
 
     .poop-card img {
       width: 100%;
-      height: 120px;
+      height: 150px;
       object-fit: contain;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+    }
+
+    .poop-label {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #6f3f1b;
+      margin-bottom: 8px;
     }
 
     .drop-zone {
       border: 2px dashed #caa481;
       border-radius: 12px;
       padding: 8px;
-      min-height: 48px;
+      min-height: 52px;
       display: flex;
       align-items: center;
       justify-content: center;
       background: #fff4e6;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
+      font-weight: 600;
     }
 
     .drop-zone.filled {
@@ -130,6 +196,12 @@
       border-style: solid;
       border-color: #63a861;
       font-weight: 700;
+    }
+
+    .drop-zone.correct {
+      background: #d9f7ff;
+      border-color: #4b9bb5;
+      color: #13576e;
     }
 
     .controls {
@@ -150,6 +222,12 @@
       cursor: pointer;
       box-shadow: 0 6px 0 rgba(51, 23, 10, 0.4);
       transition: transform 0.1s ease;
+      font-weight: 700;
+    }
+
+    button.secondary {
+      background: #3f7a53;
+      box-shadow: 0 6px 0 rgba(18, 65, 34, 0.4);
     }
 
     button:hover {
@@ -215,6 +293,13 @@
       }
     }
 
+    .music-indicator {
+      font-size: 0.9rem;
+      text-align: center;
+      color: #6b4a3b;
+      margin-top: 8px;
+    }
+
     @media (max-width: 900px) {
       .arena {
         grid-template-columns: 1fr;
@@ -222,24 +307,26 @@
     }
   </style>
 </head>
-<body>
-  <div class="victory-banner" id="victoryBanner">Poopsplosion! Player 2 nailed it! 🎉</div>
-  <h1>Sort the Poop!</h1>
-  <p class="subtitle">Player 1 names the poops. Player 2 guesses. Get 5/10 for a glorious poopsplosion.</p>
+<body class="confetti-clouds">
+  <div class="victory-banner" id="victoryBanner">Poopsplosion! The ranking was legendary! 🎉</div>
+  <h1>Rank the Poop Parade!</h1>
+  <p class="subtitle">Player 1 ranks the poops from 1-10. Player 2 tries to match the order. Score 5/10 to unleash the poopsplosion.</p>
 
   <div class="game-shell">
-    <div class="stage-banner" id="stageBanner">Stage 1: Player 1, drag each name onto a poop.</div>
+    <div class="stage-banner" id="stageBanner">Stage 1: Player 1, drag each rank badge onto a poop.</div>
     <div class="arena">
-      <section class="name-bank">
-        <h3 id="nameBankTitle">Name Bank</h3>
-        <div id="nameBank"></div>
+      <section class="rank-bank">
+        <h3 id="rankBankTitle">Ranking Badges</h3>
+        <div id="rankBank"></div>
       </section>
       <section class="poop-grid" id="poopGrid"></section>
     </div>
     <div class="controls">
-      <button id="primaryAction">Selections Complete</button>
-      <button id="resetGame">Reset Round</button>
+      <button id="primaryAction">Ranking Complete</button>
+      <button id="resetGame" class="secondary">Reset Parade</button>
+      <button id="toggleMusic" class="secondary">Start Poop Groove</button>
     </div>
+    <div class="music-indicator" id="musicStatus">🎵 Poop Groove is paused. Tap to unleash the toot beat.</div>
     <div class="status" id="status"></div>
   </div>
 
@@ -284,135 +371,263 @@
       "Cinnamon Clogs",
       "Sundae Sploot",
       "Snuggle Smudge",
-      "Crinkle Crumb"
+      "Crinkle Crumb",
+      "Fluffy Flop",
+      "Gremlin Gravy",
+      "Olive Ooze",
+      "Taffy Tumble",
+      "Butterscotch Blob",
+      "Wiggle Waffle",
+      "Gloop Galaxy",
+      "Zigzag Zoodle",
+      "Puffle Puff",
+      "Caramel Crater",
+      "Squish Biscuit",
+      "Jiggly Jello",
+      "Toffee Tootsie",
+      "Peanut Plunk",
+      "Froyo Flush"
     ];
 
-    const poopPalette = [
-      { tone: "#8d5a2b", accent: "#f7d9a6", label: "Mound", style: "mound" },
-      { tone: "#6f3f1b", accent: "#d9f2c0", label: "Log", style: "log" },
-      { tone: "#b0733d", accent: "#f9e0bf", label: "Pile", style: "pile" },
-      { tone: "#a15f33", accent: "#f5c48d", label: "Droppings", style: "droppings" },
-      { tone: "#7a4b24", accent: "#c7f0c2", label: "Green Puff", style: "puff" },
-      { tone: "#b7804a", accent: "#ffe2c2", label: "Orange Blorp", style: "blorp" },
-      { tone: "#915c2e", accent: "#f1c28b", label: "Pebbles", style: "pebbles" },
-      { tone: "#a86a37", accent: "#f7d9a6", label: "Coil", style: "coil" },
-      { tone: "#8f4f23", accent: "#f9e0bf", label: "Stack", style: "stack" },
-      { tone: "#9a6234", accent: "#f5d2a6", label: "Swirl", style: "swirl" }
+    const poopDesigns = [
+      {
+        style: "volcano",
+        tone: "#7a3e1b",
+        accent: "#f7d9a6",
+        glaze: "#f9aa4d",
+        sparkle: "#ffe6b4",
+        accessory: "crown"
+      },
+      {
+        style: "log",
+        tone: "#5b2f12",
+        accent: "#d0f0b8",
+        glaze: "#8be26a",
+        sparkle: "#d4ffb4",
+        accessory: "goggles"
+      },
+      {
+        style: "puffs",
+        tone: "#9b5b2f",
+        accent: "#fce0b4",
+        glaze: "#ff9f6e",
+        sparkle: "#ffe0c2",
+        accessory: "bow"
+      },
+      {
+        style: "meteor",
+        tone: "#a16233",
+        accent: "#f7d9a6",
+        glaze: "#f1b97a",
+        sparkle: "#fff0c9",
+        accessory: "star"
+      },
+      {
+        style: "softserve",
+        tone: "#8a4a26",
+        accent: "#f6c98d",
+        glaze: "#ffce6b",
+        sparkle: "#ffe6a4",
+        accessory: "sprinkles"
+      },
+      {
+        style: "droplets",
+        tone: "#7f4d24",
+        accent: "#f2caa0",
+        glaze: "#f08f5b",
+        sparkle: "#ffd9b8",
+        accessory: "heart"
+      },
+      {
+        style: "spiral",
+        tone: "#6f3b1a",
+        accent: "#d8f1c2",
+        glaze: "#7ecb58",
+        sparkle: "#e3ffd1",
+        accessory: "mustache"
+      },
+      {
+        style: "crystals",
+        tone: "#94602f",
+        accent: "#f4d7b1",
+        glaze: "#ffb86f",
+        sparkle: "#fff1c7",
+        accessory: "tiara"
+      },
+      {
+        style: "stack",
+        tone: "#845026",
+        accent: "#f6d0a3",
+        glaze: "#ffb84d",
+        sparkle: "#ffedb0",
+        accessory: "pepper"
+      },
+      {
+        style: "monster",
+        tone: "#6c4422",
+        accent: "#c7f0c2",
+        glaze: "#67d96c",
+        sparkle: "#c9ffda",
+        accessory: "antenna"
+      }
     ];
 
-    const nameBank = document.getElementById("nameBank");
+    const rankBank = document.getElementById("rankBank");
     const poopGrid = document.getElementById("poopGrid");
     const stageBanner = document.getElementById("stageBanner");
     const status = document.getElementById("status");
     const primaryAction = document.getElementById("primaryAction");
     const resetGame = document.getElementById("resetGame");
     const victoryBanner = document.getElementById("victoryBanner");
+    const toggleMusic = document.getElementById("toggleMusic");
+    const musicStatus = document.getElementById("musicStatus");
 
     let stage = 1;
     let chosenNames = [];
     let assignments = {};
     let guesses = {};
 
-    function buildPoopSvg({ tone, accent, label, style }, index) {
+    let audioContext = null;
+    let grooveInterval = null;
+    let isPlaying = false;
+
+    function buildPoopSvg({ tone, accent, glaze, sparkle, style, accessory }, index, name) {
       const stroke = "#3f220f";
-      const accentAlt = accent === "#c7f0c2" ? "#7bbd77" : "#f1c28b";
-      const shapes = {
-        mound: `
-          <path d='M40 124c0-22 18-38 42-38 2-18 20-32 38-32 22 0 40 16 40 34 20 2 34 18 34 36 0 14-12 24-28 24H64c-14 0-24-10-24-24z' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
-          <path d='M74 82c0-10 12-20 30-20s30 10 30 20' fill='none' stroke='${stroke}' stroke-width='4' stroke-linecap='round'/>
+      const base = {
+        volcano: `
+          <path d='M52 128c0-24 22-46 54-46 4-20 24-36 48-36 26 0 46 16 46 38 22 4 36 22 36 42 0 20-16 32-34 32H78c-14 0-26-10-26-30z' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+          <path d='M84 88c0-10 14-20 36-20 22 0 36 10 36 20' fill='none' stroke='${stroke}' stroke-width='4' stroke-linecap='round'/>
+          <circle cx='120' cy='68' r='12' fill='${glaze}'/>
+          <path d='M104 40c8 12 14 24 16 36' fill='none' stroke='${glaze}' stroke-width='6' stroke-linecap='round'/>
         `,
         log: `
-          <rect x='40' y='80' width='120' height='40' rx='20' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
-          <circle cx='52' cy='100' r='12' fill='${accent}' stroke='${stroke}' stroke-width='3'/>
-          <circle cx='148' cy='100' r='12' fill='${accentAlt}' stroke='${stroke}' stroke-width='3'/>
+          <rect x='32' y='88' width='136' height='50' rx='24' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+          <rect x='56' y='76' width='88' height='22' rx='10' fill='${accent}' stroke='${stroke}' stroke-width='3'/>
+          <circle cx='44' cy='112' r='12' fill='${glaze}'/>
+          <circle cx='156' cy='112' r='12' fill='${glaze}'/>
         `,
-        pile: `
-          <path d='M60 120c0-14 12-26 28-26 2-14 14-24 30-24 18 0 30 12 30 26 14 0 24 10 24 24 0 12-10 20-24 20H72c-12 0-22-8-22-20z' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
-          <path d='M90 88c0-8 8-14 18-14 10 0 18 6 18 14' fill='none' stroke='${stroke}' stroke-width='4'/>
+        puffs: `
+          <circle cx='70' cy='118' r='28' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+          <circle cx='118' cy='110' r='30' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+          <circle cx='92' cy='84' r='24' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+          <circle cx='120' cy='82' r='10' fill='${glaze}'/>
         `,
-        droppings: `
-          <circle cx='70' cy='110' r='20' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
-          <circle cx='120' cy='116' r='16' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
-          <circle cx='95' cy='90' r='14' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+        meteor: `
+          <path d='M44 120c10-26 34-44 60-44 26 0 48 18 56 42 8 24-10 44-32 44H70c-18 0-34-14-26-42z' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+          <path d='M22 90c18 0 30-10 42-24' fill='none' stroke='${glaze}' stroke-width='6' stroke-linecap='round'/>
+          <path d='M22 110c18 0 34-12 44-30' fill='none' stroke='${glaze}' stroke-width='4' stroke-linecap='round'/>
         `,
-        puff: `
-          <path d='M50 120c0-18 14-32 32-32 2-14 16-24 32-24 18 0 32 12 32 28 18 2 32 16 32 32 0 12-10 20-22 20H70c-12 0-20-8-20-20z' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
-          <circle cx='90' cy='78' r='6' fill='${accent}'/>
-          <circle cx='120' cy='82' r='5' fill='${accentAlt}'/>
+        softserve: `
+          <path d='M70 130c0-12 12-22 28-22h24c16 0 28-10 28-22 0-14-16-22-28-22-12 0-22 6-26 14' fill='none' stroke='${stroke}' stroke-width='16' stroke-linecap='round'/>
+          <path d='M74 124c0-8 8-14 18-14h22c12 0 20-8 20-16 0-10-12-16-22-16-8 0-16 4-20 10' fill='none' stroke='${tone}' stroke-width='16' stroke-linecap='round'/>
+          <circle cx='118' cy='64' r='12' fill='${glaze}'/>
         `,
-        blorp: `
-          <path d='M48 118c0-20 20-34 44-34 0-16 14-28 32-28 20 0 36 14 36 32 18 2 32 16 32 32 0 12-10 20-22 20H70c-12 0-22-8-22-20z' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
-          <ellipse cx='120' cy='88' rx='10' ry='6' fill='${accent}'/>
+        droplets: `
+          <circle cx='72' cy='120' r='18' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+          <circle cx='112' cy='118' r='20' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+          <circle cx='96' cy='92' r='16' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+          <path d='M126 84c0 12 8 20 20 20' fill='none' stroke='${glaze}' stroke-width='5' stroke-linecap='round'/>
         `,
-        pebbles: `
-          <circle cx='70' cy='108' r='14' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
-          <circle cx='98' cy='102' r='12' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
-          <circle cx='126' cy='112' r='10' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
-          <circle cx='96' cy='124' r='16' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+        spiral: `
+          <path d='M60 130c0-16 14-28 32-28h36c18 0 32-12 32-28 0-18-18-30-36-30-14 0-26 6-32 14' fill='none' stroke='${tone}' stroke-width='14' stroke-linecap='round'/>
+          <path d='M72 126c0-10 10-18 22-18h30c14 0 24-10 24-22 0-14-14-22-26-22-10 0-18 4-24 10' fill='none' stroke='${glaze}' stroke-width='10' stroke-linecap='round'/>
         `,
-        coil: `
-          <path d='M60 120c0-10 10-18 22-18h36c12 0 22 8 22 18s-10 18-22 18H82c-12 0-22-8-22-18z' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
-          <path d='M70 96c0-8 8-14 18-14h24c10 0 18 6 18 14s-8 14-18 14H88c-10 0-18-6-18-14z' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
-          <path d='M82 74c0-6 6-10 14-10h12c8 0 14 4 14 10s-6 10-14 10H96c-8 0-14-4-14-10z' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+        crystals: `
+          <path d='M60 126c0-22 18-38 42-38 2-18 20-32 38-32 22 0 40 16 40 34 20 2 34 18 34 36 0 14-12 24-28 24H64c-14 0-24-10-24-24z' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+          <polygon points='60,70 72,52 84,72' fill='${glaze}'/>
+          <polygon points='122,62 132,44 142,64' fill='${glaze}'/>
+          <polygon points='96,50 106,32 116,52' fill='${glaze}'/>
         `,
         stack: `
-          <rect x='70' y='96' width='60' height='30' rx='14' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
-          <rect x='76' y='70' width='48' height='26' rx='12' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
-          <rect x='84' y='50' width='32' height='22' rx='10' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+          <rect x='72' y='100' width='68' height='34' rx='16' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+          <rect x='80' y='70' width='52' height='28' rx='14' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+          <rect x='90' y='46' width='34' height='22' rx='10' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+          <circle cx='118' cy='64' r='6' fill='${glaze}'/>
         `,
-        swirl: `
-          <path d='M60 120c0-14 12-24 28-24h34c16 0 28-10 28-22 0-14-14-22-28-22-10 0-18 4-22 10' fill='none' stroke='${stroke}' stroke-width='10' stroke-linecap='round'/>
-          <path d='M74 118c0-8 6-14 14-14h28c12 0 20-6 20-14 0-10-10-16-20-16-8 0-14 4-18 8' fill='none' stroke='${tone}' stroke-width='10' stroke-linecap='round'/>
+        monster: `
+          <path d='M50 128c0-24 20-44 46-44 4-18 22-34 44-34 24 0 44 16 44 38 22 4 36 22 36 42 0 20-16 32-34 32H76c-16 0-26-10-26-34z' fill='${tone}' stroke='${stroke}' stroke-width='4'/>
+          <circle cx='94' cy='90' r='8' fill='${accent}'/>
+          <circle cx='132' cy='90' r='8' fill='${accent}'/>
+          <circle cx='94' cy='90' r='4' fill='${stroke}'/>
+          <circle cx='132' cy='90' r='4' fill='${stroke}'/>
+          <path d='M100 112c10 8 22 8 32 0' fill='none' stroke='${stroke}' stroke-width='4' stroke-linecap='round'/>
         `
       };
 
+      const accessories = {
+        crown: `<path d='M84 36l10 16 12-16 10 16 12-16 6 20H88z' fill='${sparkle}' stroke='${stroke}' stroke-width='2'/>`,
+        goggles: `<rect x='70' y='70' width='26' height='18' rx='6' fill='${sparkle}'/><rect x='104' y='70' width='26' height='18' rx='6' fill='${sparkle}'/><line x1='96' y1='79' x2='104' y2='79' stroke='${stroke}' stroke-width='3'/>`,
+        bow: `<path d='M88 64c0-10 8-18 18-18 10 0 18 8 18 18-10-6-26-6-36 0z' fill='${sparkle}'/>`,
+        star: `<polygon points='130,52 134,64 146,64 136,72 140,84 130,76 120,84 124,72 114,64 126,64' fill='${sparkle}'/>`,
+        sprinkles: `<circle cx='88' cy='70' r='4' fill='${sparkle}'/><circle cx='112' cy='64' r='4' fill='${sparkle}'/><circle cx='132' cy='70' r='4' fill='${sparkle}'/>`,
+        heart: `<path d='M120 72c6-10 18-6 18 4 0 12-18 18-18 18s-18-6-18-18c0-10 12-14 18-4z' fill='${sparkle}'/>`,
+        mustache: `<path d='M88 94c6-10 16-10 22 0 6-10 16-10 22 0-6 12-16 12-22 4-6 8-16 8-22-4z' fill='${sparkle}'/>`,
+        tiara: `<path d='M80 52l8 16 12-16 12 16 12-16 8 16v10H80z' fill='${sparkle}'/>`,
+        pepper: `<path d='M110 54c0-8 6-12 14-12 2 6 0 12-6 18' fill='${sparkle}'/>`,
+        antenna: `<line x1='120' y1='54' x2='134' y2='38' stroke='${sparkle}' stroke-width='4'/><circle cx='136' cy='36' r='6' fill='${sparkle}'/>`
+      };
+
       return `
-        <svg xmlns='http://www.w3.org/2000/svg' width='200' height='160' viewBox='0 0 200 160'>
-          <rect width='200' height='160' fill='#fff4e6'/>
-          ${shapes[style]}
-          <text x='12' y='24' font-size='14' fill='#6f3f1b'>${label} ${index + 1}</text>
+        <svg xmlns='http://www.w3.org/2000/svg' width='220' height='170' viewBox='0 0 220 170'>
+          <defs>
+            <linearGradient id='bg-${index}' x1='0' y1='0' x2='1' y2='1'>
+              <stop offset='0%' stop-color='#fff6e0'/>
+              <stop offset='100%' stop-color='${accent}'/>
+            </linearGradient>
+          </defs>
+          <rect width='220' height='170' rx='18' fill='url(#bg-${index})'/>
+          <ellipse cx='110' cy='142' rx='60' ry='14' fill='rgba(0,0,0,0.15)'/>
+          ${base[style]}
+          ${accessories[accessory] || ""}
+          <circle cx='34' cy='34' r='8' fill='${sparkle}' opacity='0.7'/>
+          <circle cx='188' cy='40' r='6' fill='${sparkle}' opacity='0.6'/>
+          <text x='12' y='24' font-size='12' fill='#6f3f1b'>${name}</text>
         </svg>
       `;
     }
 
-    const poopImages = poopPalette.map((palette, index) => {
-      const svg = buildPoopSvg(palette, index);
-      return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-    });
+    const poopImages = poopDesigns.map((design, index) => design);
 
     function pickRandomNames() {
       const shuffled = [...allNames].sort(() => 0.5 - Math.random());
       return shuffled.slice(0, 10);
     }
 
-    function buildNameBank(names) {
-      nameBank.innerHTML = "";
-      names.forEach((name) => {
+    function buildRankBank(isShuffled) {
+      rankBank.innerHTML = "";
+      const ranks = Array.from({ length: 10 }, (_, index) => index + 1);
+      const list = isShuffled ? ranks.sort(() => 0.5 - Math.random()) : ranks;
+      list.forEach((rank) => {
         const pill = document.createElement("div");
-        pill.className = "draggable-name";
-        pill.textContent = name;
+        pill.className = "rank-pill";
+        pill.innerHTML = `<span>🏆</span> Rank ${rank}`;
         pill.draggable = true;
-        pill.dataset.name = name;
+        pill.dataset.rank = String(rank);
         pill.addEventListener("dragstart", () => pill.classList.add("dragging"));
         pill.addEventListener("dragend", () => pill.classList.remove("dragging"));
-        nameBank.appendChild(pill);
+        rankBank.appendChild(pill);
       });
     }
 
     function buildPoopGrid() {
       poopGrid.innerHTML = "";
-      poopImages.forEach((src, index) => {
+      poopImages.forEach((design, index) => {
         const card = document.createElement("div");
         card.className = "poop-card";
         card.dataset.id = String(index);
 
         const img = document.createElement("img");
-        img.src = src;
+        const svg = buildPoopSvg(design, index, chosenNames[index]);
+        img.src = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
         img.alt = `Cartoon poop ${index + 1}`;
+
+        const label = document.createElement("div");
+        label.className = "poop-label";
+        label.textContent = `Poop ${index + 1}: ${chosenNames[index]}`;
 
         const dropZone = document.createElement("div");
         dropZone.className = "drop-zone";
-        dropZone.textContent = "Drop name here";
+        dropZone.textContent = "Drop rank badge here";
         dropZone.dataset.id = String(index);
 
         dropZone.addEventListener("dragover", (event) => {
@@ -421,44 +636,45 @@
 
         dropZone.addEventListener("drop", (event) => {
           event.preventDefault();
-          const dragged = document.querySelector(".draggable-name.dragging");
+          const dragged = document.querySelector(".rank-pill.dragging");
           if (!dragged) return;
-          handleDrop(dropZone.dataset.id, dragged.dataset.name);
+          handleDrop(dropZone.dataset.id, dragged.dataset.rank);
         });
 
         card.appendChild(img);
+        card.appendChild(label);
         card.appendChild(dropZone);
         poopGrid.appendChild(card);
       });
     }
 
-    function handleDrop(id, name) {
+    function handleDrop(id, rank) {
       if (stage === 1) {
-        assignments[id] = name;
+        assignments[id] = rank;
       } else {
-        guesses[id] = name;
+        guesses[id] = rank;
       }
-      updateDropZone(id, name);
+      updateDropZone(id, rank);
       updateStatus();
     }
 
-    function updateDropZone(id, name) {
+    function updateDropZone(id, rank) {
       const dropZone = document.querySelector(`.drop-zone[data-id='${id}']`);
       if (!dropZone) return;
-      dropZone.textContent = name;
+      dropZone.textContent = `Rank ${rank}`;
       dropZone.classList.add("filled");
     }
 
     function clearDropZones(message) {
       document.querySelectorAll(".drop-zone").forEach((zone) => {
         zone.textContent = message;
-        zone.classList.remove("filled");
+        zone.classList.remove("filled", "correct");
       });
     }
 
     function updateStatus() {
       const selected = stage === 1 ? Object.keys(assignments).length : Object.keys(guesses).length;
-      status.textContent = `Assigned ${selected}/10 poops.`;
+      status.textContent = `Ranked ${selected}/10 poops.`;
     }
 
     function resetRound() {
@@ -466,42 +682,52 @@
       assignments = {};
       guesses = {};
       chosenNames = pickRandomNames();
-      buildNameBank(chosenNames);
+      buildRankBank(false);
       buildPoopGrid();
-      stageBanner.textContent = "Stage 1: Player 1, drag each name onto a poop.";
-      primaryAction.textContent = "Selections Complete";
+      stageBanner.textContent = "Stage 1: Player 1, drag each rank badge onto a poop.";
+      primaryAction.textContent = "Ranking Complete";
       primaryAction.disabled = false;
-      status.textContent = "Assigned 0/10 poops.";
+      status.textContent = "Ranked 0/10 poops.";
       victoryBanner.classList.remove("show");
+    }
+
+    function highlightCorrect() {
+      document.querySelectorAll(".drop-zone").forEach((zone) => {
+        const id = zone.dataset.id;
+        if (assignments[id] && guesses[id] && assignments[id] === guesses[id]) {
+          zone.classList.add("correct");
+        }
+      });
     }
 
     primaryAction.addEventListener("click", () => {
       if (stage === 1) {
         if (Object.keys(assignments).length < 10) {
-          status.textContent = "Player 1 needs to name all 10 poops!";
+          status.textContent = "Player 1 needs to rank all 10 poops!";
           return;
         }
         stage = 2;
         guesses = {};
-        buildNameBank(chosenNames.sort(() => 0.5 - Math.random()));
-        clearDropZones("Player 2, guess!");
-        stageBanner.textContent = "Stage 2: Player 2, drag the names onto the poops.";
-        primaryAction.textContent = "Check Guesses";
+        buildRankBank(true);
+        clearDropZones("Player 2, guess the rank!");
+        stageBanner.textContent = "Stage 2: Player 2, match the ranking.";
+        primaryAction.textContent = "Check Rankings";
         status.textContent = "Player 2, make your guesses.";
       } else {
         if (Object.keys(guesses).length < 10) {
-          status.textContent = "Player 2 must guess all 10 poops!";
+          status.textContent = "Player 2 must rank all 10 poops!";
           return;
         }
         let correct = 0;
-        Object.entries(assignments).forEach(([id, name]) => {
-          if (guesses[id] === name) {
+        Object.entries(assignments).forEach(([id, rank]) => {
+          if (guesses[id] === rank) {
             correct += 1;
           }
         });
 
-        status.textContent = `Player 2 got ${correct}/10 correct.`;
+        status.textContent = `Player 2 matched ${correct}/10 ranks.`;
         primaryAction.disabled = true;
+        highlightCorrect();
         if (correct >= 5) {
           triggerVictory();
         }
@@ -517,6 +743,62 @@
       });
       victoryBanner.classList.add("show");
     }
+
+    function playNote(freq, duration, type = "triangle") {
+      if (!audioContext) return;
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      oscillator.type = type;
+      oscillator.frequency.value = freq;
+      gainNode.gain.setValueAtTime(0.12, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+      oscillator.connect(gainNode).connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + duration);
+    }
+
+    function startGroove() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      const pattern = [
+        { freq: 196, dur: 0.2 },
+        { freq: 246.94, dur: 0.18 },
+        { freq: 293.66, dur: 0.2 },
+        { freq: 220, dur: 0.16 },
+        { freq: 261.63, dur: 0.22 },
+        { freq: 174.61, dur: 0.2 },
+        { freq: 246.94, dur: 0.18 },
+        { freq: 196, dur: 0.2 }
+      ];
+      let step = 0;
+      grooveInterval = setInterval(() => {
+        const note = pattern[step % pattern.length];
+        playNote(note.freq, note.dur, step % 2 === 0 ? "triangle" : "square");
+        step += 1;
+      }, 230);
+      isPlaying = true;
+      toggleMusic.textContent = "Pause Poop Groove";
+      musicStatus.textContent = "🎵 Poop Groove is live! Feel the toot beat.";
+    }
+
+    function stopGroove() {
+      if (grooveInterval) {
+        clearInterval(grooveInterval);
+        grooveInterval = null;
+      }
+      isPlaying = false;
+      toggleMusic.textContent = "Start Poop Groove";
+      musicStatus.textContent = "🎵 Poop Groove is paused. Tap to unleash the toot beat.";
+    }
+
+    toggleMusic.addEventListener("click", () => {
+      if (isPlaying) {
+        stopGroove();
+      } else {
+        startGroove();
+      }
+    });
 
     resetRound();
   </script>
