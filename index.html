@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sort the Poop!</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      background: #f7f2e8;
+      color: #2b1a12;
+    }
+
+    body {
+      margin: 0;
+      padding: 32px 20px 48px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+      font-size: 2.4rem;
+    }
+
+    p.subtitle {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 24px;
+      color: #6b4a3b;
+    }
+
+    .game-shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #fffaf3;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(43, 26, 18, 0.15);
+      border: 2px solid #e7d6c5;
+    }
+
+    .stage-banner {
+      background: #f4e2c8;
+      border: 2px dashed #a36e3f;
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .arena {
+      display: grid;
+      grid-template-columns: 1.2fr 2fr;
+      gap: 24px;
+    }
+
+    .name-bank {
+      background: #fff;
+      border-radius: 16px;
+      padding: 16px;
+      border: 2px solid #ead6c3;
+      min-height: 260px;
+    }
+
+    .name-bank h3 {
+      margin-top: 0;
+    }
+
+    .draggable-name {
+      background: #ffd8a9;
+      border: 2px solid #b66c2e;
+      color: #4d2c13;
+      padding: 8px 10px;
+      margin: 8px 0;
+      border-radius: 10px;
+      cursor: grab;
+      font-weight: 600;
+      text-align: center;
+      box-shadow: 0 4px 0 rgba(182, 108, 46, 0.4);
+    }
+
+    .draggable-name.dragging {
+      opacity: 0.5;
+    }
+
+    .poop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+    }
+
+    .poop-card {
+      background: #fff;
+      border-radius: 16px;
+      border: 2px solid #d8b89c;
+      padding: 12px;
+      text-align: center;
+      position: relative;
+      min-height: 210px;
+      transition: transform 0.2s ease;
+    }
+
+    .poop-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .poop-card img {
+      width: 100%;
+      height: 120px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+
+    .drop-zone {
+      border: 2px dashed #caa481;
+      border-radius: 12px;
+      padding: 8px;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff4e6;
+      font-size: 0.9rem;
+    }
+
+    .drop-zone.filled {
+      background: #e9ffe4;
+      border-style: solid;
+      border-color: #63a861;
+      font-weight: 700;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      background: #7a3f20;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 999px;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 6px 0 rgba(51, 23, 10, 0.4);
+      transition: transform 0.1s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
+    button:disabled {
+      background: #c9b09c;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .status {
+      text-align: center;
+      margin-top: 16px;
+      font-weight: 600;
+      color: #5a3320;
+    }
+
+    .victory-banner {
+      position: fixed;
+      left: 50%;
+      top: -200px;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, #ffb347, #ffcc33);
+      color: #4d250f;
+      padding: 18px 30px;
+      border-radius: 20px;
+      font-size: 1.6rem;
+      font-weight: 800;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+      border: 3px solid #8a4b1c;
+      transition: top 0.8s ease;
+      z-index: 10;
+    }
+
+    .victory-banner.show {
+      top: 24px;
+    }
+
+    .explode::after {
+      content: "💥";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3rem;
+      animation: pop 0.6s ease forwards;
+    }
+
+    @keyframes pop {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+      }
+      80% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.6);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .arena {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="victory-banner" id="victoryBanner">Poopsplosion! Player 2 nailed it! 🎉</div>
+  <h1>Sort the Poop!</h1>
+  <p class="subtitle">Player 1 names the poops. Player 2 guesses. Get 5/10 for a glorious poopsplosion.</p>
+
+  <div class="game-shell">
+    <div class="stage-banner" id="stageBanner">Stage 1: Player 1, drag each name onto a poop.</div>
+    <div class="arena">
+      <section class="name-bank">
+        <h3 id="nameBankTitle">Name Bank</h3>
+        <div id="nameBank"></div>
+      </section>
+      <section class="poop-grid" id="poopGrid"></section>
+    </div>
+    <div class="controls">
+      <button id="primaryAction">Selections Complete</button>
+      <button id="resetGame">Reset Round</button>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    const allNames = [
+      "Goopy Poop",
+      "Giggly Gobbler",
+      "Swamp Swirl",
+      "Wobbly Nugget",
+      "Pudding Plop",
+      "Sassy Splat",
+      "Fuzzy Fudge",
+      "Muddy Muffin",
+      "Giggle Glop",
+      "Sticky Twister",
+      "Marshmallow Mash",
+      "Gravy Wave",
+      "Crater Casserole",
+      "Cheeky Chunk",
+      "Snicker Stack",
+      "Cocoa Comet",
+      "Blobby Brownie",
+      "Tornado Turd",
+      "Scooter Splat",
+      "Bubble Biscuit",
+      "Choco Cyclone",
+      "Rumble Rolo",
+      "Funky Fondue",
+      "Thunder Truffle",
+      "Flapjack Flop",
+      "Doodle Dung",
+      "Tippy Toot",
+      "Pancake Plunk",
+      "Dizzy Dookie",
+      "Waffle Wiggle",
+      "Noodle Nudge",
+      "Bristle Brick",
+      "Sprinkle Sprinkle",
+      "Marmalade Mound",
+      "Banana Blorp",
+      "Bouncy Biscotti",
+      "Cinnamon Clogs",
+      "Sundae Sploot",
+      "Snuggle Smudge",
+      "Crinkle Crumb"
+    ];
+
+    const poopPalette = [
+      "#8d5a2b",
+      "#9a6234",
+      "#7a4b24",
+      "#b0733d",
+      "#6f3f1b",
+      "#a15f33",
+      "#8f4f23",
+      "#b7804a",
+      "#915c2e",
+      "#a86a37"
+    ];
+
+    const nameBank = document.getElementById("nameBank");
+    const poopGrid = document.getElementById("poopGrid");
+    const stageBanner = document.getElementById("stageBanner");
+    const status = document.getElementById("status");
+    const primaryAction = document.getElementById("primaryAction");
+    const resetGame = document.getElementById("resetGame");
+    const victoryBanner = document.getElementById("victoryBanner");
+
+    let stage = 1;
+    let chosenNames = [];
+    let assignments = {};
+    let guesses = {};
+
+    const poopImages = poopPalette.map((color, index) => {
+      const svg = `
+        <svg xmlns='http://www.w3.org/2000/svg' width='200' height='160' viewBox='0 0 200 160'>
+          <rect width='200' height='160' fill='#fff4e6'/>
+          <path d='M60 120c-10 0-20-6-20-16 0-14 16-24 30-24 0-14 12-26 30-26 18 0 30 12 30 26 14 0 30 10 30 24 0 10-10 16-20 16H60z' fill='${color}' stroke='#3f220f' stroke-width='4'/>
+          <path d='M70 80c0-12 10-22 30-22s30 10 30 22' fill='none' stroke='#3f220f' stroke-width='4' stroke-linecap='round'/>
+          <circle cx='90' cy='68' r='6' fill='#f7d9a6'/>
+          <circle cx='120' cy='70' r='5' fill='#f1c28b'/>
+          <circle cx='105' cy='60' r='4' fill='#f9e0bf'/>
+          <text x='12' y='24' font-size='14' fill='#6f3f1b'>Poop ${index + 1}</text>
+        </svg>
+      `;
+      return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+    });
+
+    function pickRandomNames() {
+      const shuffled = [...allNames].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, 10);
+    }
+
+    function buildNameBank(names) {
+      nameBank.innerHTML = "";
+      names.forEach((name) => {
+        const pill = document.createElement("div");
+        pill.className = "draggable-name";
+        pill.textContent = name;
+        pill.draggable = true;
+        pill.dataset.name = name;
+        pill.addEventListener("dragstart", () => pill.classList.add("dragging"));
+        pill.addEventListener("dragend", () => pill.classList.remove("dragging"));
+        nameBank.appendChild(pill);
+      });
+    }
+
+    function buildPoopGrid() {
+      poopGrid.innerHTML = "";
+      poopImages.forEach((src, index) => {
+        const card = document.createElement("div");
+        card.className = "poop-card";
+        card.dataset.id = String(index);
+
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = `Cartoon poop ${index + 1}`;
+
+        const dropZone = document.createElement("div");
+        dropZone.className = "drop-zone";
+        dropZone.textContent = "Drop name here";
+        dropZone.dataset.id = String(index);
+
+        dropZone.addEventListener("dragover", (event) => {
+          event.preventDefault();
+        });
+
+        dropZone.addEventListener("drop", (event) => {
+          event.preventDefault();
+          const dragged = document.querySelector(".draggable-name.dragging");
+          if (!dragged) return;
+          handleDrop(dropZone.dataset.id, dragged.dataset.name);
+        });
+
+        card.appendChild(img);
+        card.appendChild(dropZone);
+        poopGrid.appendChild(card);
+      });
+    }
+
+    function handleDrop(id, name) {
+      if (stage === 1) {
+        assignments[id] = name;
+      } else {
+        guesses[id] = name;
+      }
+      updateDropZone(id, name);
+      updateStatus();
+    }
+
+    function updateDropZone(id, name) {
+      const dropZone = document.querySelector(`.drop-zone[data-id='${id}']`);
+      if (!dropZone) return;
+      dropZone.textContent = name;
+      dropZone.classList.add("filled");
+    }
+
+    function clearDropZones(message) {
+      document.querySelectorAll(".drop-zone").forEach((zone) => {
+        zone.textContent = message;
+        zone.classList.remove("filled");
+      });
+    }
+
+    function updateStatus() {
+      const selected = stage === 1 ? Object.keys(assignments).length : Object.keys(guesses).length;
+      status.textContent = `Assigned ${selected}/10 poops.`;
+    }
+
+    function resetRound() {
+      stage = 1;
+      assignments = {};
+      guesses = {};
+      chosenNames = pickRandomNames();
+      buildNameBank(chosenNames);
+      buildPoopGrid();
+      stageBanner.textContent = "Stage 1: Player 1, drag each name onto a poop.";
+      primaryAction.textContent = "Selections Complete";
+      primaryAction.disabled = false;
+      status.textContent = "Assigned 0/10 poops.";
+      victoryBanner.classList.remove("show");
+    }
+
+    primaryAction.addEventListener("click", () => {
+      if (stage === 1) {
+        if (Object.keys(assignments).length < 10) {
+          status.textContent = "Player 1 needs to name all 10 poops!";
+          return;
+        }
+        stage = 2;
+        guesses = {};
+        buildNameBank(chosenNames.sort(() => 0.5 - Math.random()));
+        clearDropZones("Player 2, guess!");
+        stageBanner.textContent = "Stage 2: Player 2, drag the names onto the poops.";
+        primaryAction.textContent = "Check Guesses";
+        status.textContent = "Player 2, make your guesses.";
+      } else {
+        if (Object.keys(guesses).length < 10) {
+          status.textContent = "Player 2 must guess all 10 poops!";
+          return;
+        }
+        let correct = 0;
+        Object.entries(assignments).forEach(([id, name]) => {
+          if (guesses[id] === name) {
+            correct += 1;
+          }
+        });
+
+        status.textContent = `Player 2 got ${correct}/10 correct.`;
+        primaryAction.disabled = true;
+        if (correct >= 5) {
+          triggerVictory();
+        }
+      }
+    });
+
+    resetGame.addEventListener("click", resetRound);
+
+    function triggerVictory() {
+      document.querySelectorAll(".poop-card").forEach((card, index) => {
+        setTimeout(() => card.classList.add("explode"), index * 80);
+        setTimeout(() => card.classList.remove("explode"), 1200 + index * 80);
+      });
+      victoryBanner.classList.add("show");
+    }
+
+    resetRound();
+  </script>
+</body>
+</html>
